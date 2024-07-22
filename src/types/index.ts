@@ -46,3 +46,10 @@ export type INewUser = {
   username: string;
   password: string;
 };
+
+export type ISignInUser = {
+  name: string;
+  email: string;
+  username: string;
+  password: string;
+};
