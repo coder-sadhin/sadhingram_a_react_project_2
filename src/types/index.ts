@@ -57,8 +57,8 @@ export type INewUser = {
 };
 
 export type ISignInUser = {
-  name: string;
+  // name: string;
   email: string;
-  username: string;
+  // username: string;
   password: string;
 };
