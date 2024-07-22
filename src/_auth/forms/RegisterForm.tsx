@@ -9,17 +9,19 @@ import {Form,FormControl,FormField,FormItem,FormLabel,FormMessage,} from "@/comp
 import { Input } from "@/components/ui/input"
 import { SignupValidation } from "@/lib/validation"
 import { Loader } from "@/components/shared/Loader"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import { createUserAccount } from "@/lib/appwrite/api"
 import { useCreateUser, useSignInUser } from "@/lib/react_query/queriesAndMuitetion"
+import { useUserContext } from "@/context/AuthContext"
 
 
 export const RegisterForm = () => {
   const { toast } = useToast()
-  const isUserLoading = false;
+  const { checkAuthUser, isLoading: isUserLoading } = useUserContext();
+  const navigate = useNavigate();
 
-  const {mutateAsync: createNewAccount , isLoading:isCreatingAccount} = useCreateUser();
-  const {mutateAsync: signInAccount , isLoading:isSignIn} = useSignInUser();
+  const {mutateAsync: createNewAccount , isPending:isCreatingAccount} = useCreateUser();
+  const {mutateAsync: signInAccount , isPending:isSignIn} = useSignInUser();
 
   const form = useForm<z.infer<typeof SignupValidation>>({
     resolver: zodResolver(SignupValidation),
@@ -33,16 +35,45 @@ export const RegisterForm = () => {
  
   
 
-  async function onSubmit(values: z.infer<typeof SignupValidation>) {
-    const newUser= await createUserAccount(values);
-    console.log(newUser)
-    if(!newUser){
-      toast({
-        title: "Sign up error, Please try again",
-      })
+  // Handler
+  const handleSignup = async (user: z.infer<typeof SignupValidation>) => {
+    try {
+      const newUser = await createUserAccount(user);
+
+      if (!newUser) {
+        toast({ title: "Sign up failed. Please try again.", });
+        
+        return;
+      }
+
+      const session = await signInAccount({
+        email: user.email,
+        password: user.password,
+      });
+
+      if (!session) {
+        toast({ title: "Something went wrong. Please login your new account", });
+        
+        navigate("/sign-in");
+        
+        return;
+      }
+
+      const isLoggedIn = await checkAuthUser();
+
+      if (isLoggedIn) {
+        form.reset();
+
+        navigate("/");
+      } else {
+        toast({ title: "Login failed. Please try again.", });
+        
+        return;
+      }
+    } catch (error) {
+      console.log({ error });
     }
-    
-  }
+  };
 
 
 
@@ -60,7 +91,7 @@ export const RegisterForm = () => {
         </p>
 
         <form
-          onSubmit={form.handleSubmit(onSubmit)}
+          onSubmit={form.handleSubmit(handleSignup)}
           className="flex flex-col gap-5 w-full mt-4">
           <FormField
             control={form.control}

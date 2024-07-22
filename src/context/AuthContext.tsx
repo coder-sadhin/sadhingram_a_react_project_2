@@ -60,10 +60,11 @@ export const INITIAL_USER = {
   
     useEffect(() => {
       const cookieFallback = localStorage.getItem("cookieFallback");
+    //   ||
+    //     cookieFallback === null ||
+    //     cookieFallback === undefined
       if (
-        cookieFallback === "[]" ||
-        cookieFallback === null ||
-        cookieFallback === undefined
+        cookieFallback === "[]" 
       ) {
         navigate("/sign-in");
       }
