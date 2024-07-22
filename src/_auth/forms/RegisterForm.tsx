@@ -11,7 +11,7 @@ import { Link } from "react-router-dom"
 import { createUserAccount } from "@/lib/appwrite/api"
 
 
-const RegisterForm = () => {
+export const RegisterForm = () => {
   const isUserLoading = false;
 
   const form = useForm<z.infer<typeof SignupValidation>>({
@@ -29,6 +29,7 @@ const RegisterForm = () => {
   async function onSubmit(values: z.infer<typeof SignupValidation>) {
     const newUser= await createUserAccount(values);
     console.log(newUser)
+    
   }
 
 
@@ -129,5 +130,3 @@ const RegisterForm = () => {
     </Form>
   )
 }
-
-export default RegisterForm
